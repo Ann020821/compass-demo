@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>商策罗盘 · Demo</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{min-height:100vh;background:radial-gradient(circle at 30% 20%,#1a2436,#0d1117);
+    font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;color:#eef0f4;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px}
+  .logo{font-size:14px;letter-spacing:3px;color:#c6a76e;margin-bottom:14px}
+  h1{font-size:34px;font-weight:800;margin-bottom:10px;background:linear-gradient(90deg,#fff,#c6a76e);
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+  .sub{color:#8a93a3;font-size:15px;margin-bottom:44px;text-align:center;line-height:1.7;max-width:520px}
+  .cards{display:flex;gap:22px;flex-wrap:wrap;justify-content:center}
+  .c{width:300px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);
+    border-radius:18px;padding:30px 26px;text-decoration:none;color:inherit;transition:.2s;cursor:pointer}
+  .c:hover{transform:translateY(-4px);border-color:#c6a76e;background:rgba(198,167,110,.06)}
+  .c .ico{font-size:38px;margin-bottom:16px}
+  .c h2{font-size:21px;margin-bottom:10px}
+  .c p{font-size:13.5px;color:#8a93a3;line-height:1.65}
+  .c .go{margin-top:18px;font-size:13px;color:#c6a76e;font-weight:600}
+  .foot{margin-top:50px;font-size:12px;color:#5a6472;text-align:center;line-height:1.8}
+</style>
+</head>
+<body>
+  <div class="logo">BUSINESS COMPASS</div>
+  <h1>商策罗盘</h1>
+  <div class="sub">基于京东支付真实交易与结算数据的商家经营决策 Agent<br>——以马克华菲童装服饰旗舰店为例，看看它能给 POP 商户做什么</div>
+  <div class="cards">
+    <a class="c" href="./chat.html">
+      <div class="ico">💬</div>
+      <h2>对话版 Demo</h2>
+      <p>像和经营顾问聊天一样，一句句追问：赚了多少、客户是谁、同行里排第几、下一步怎么做。手机对话界面。</p>
+      <div class="go">点击体验 →</div>
+    </a>
+    <a class="c" href="./report.html">
+      <div class="ico">📊</div>
+      <h2>报告版 Demo</h2>
+      <p>一次性生成的完整经营诊断报告：资金流真账、增长趋势、客群画像、同行对标、问题商品、行动清单。</p>
+      <div class="go">点击体验 →</div>
+    </a>
+  </div>
+  <div class="foot">队伍 · 心里有数　|　京东支付 · 基础产品部<br>本页为黑马大赛演示用途</div>
+</body>
+</html>
