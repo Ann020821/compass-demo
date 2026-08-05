@@ -3,45 +3,512 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>商策罗盘 · Demo</title>
+<title>商策罗盘 · 对话版</title>
 <style>
-  *{margin:0;padding:0;box-sizing:border-box}
-  body{min-height:100vh;background:radial-gradient(circle at 30% 20%,#1a2436,#0d1117);
-    font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;color:#eef0f4;
-    display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px}
-  .logo{font-size:14px;letter-spacing:3px;color:#c6a76e;margin-bottom:14px}
-  h1{font-size:34px;font-weight:800;margin-bottom:10px;background:linear-gradient(90deg,#fff,#c6a76e);
-    -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-  .sub{color:#8a93a3;font-size:15px;margin-bottom:44px;text-align:center;line-height:1.7;max-width:520px}
-  .cards{display:flex;gap:22px;flex-wrap:wrap;justify-content:center}
-  .c{width:300px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);
-    border-radius:18px;padding:30px 26px;text-decoration:none;color:inherit;transition:.2s;cursor:pointer}
-  .c:hover{transform:translateY(-4px);border-color:#c6a76e;background:rgba(198,167,110,.06)}
-  .c .ico{font-size:38px;margin-bottom:16px}
-  .c h2{font-size:21px;margin-bottom:10px}
-  .c p{font-size:13.5px;color:#8a93a3;line-height:1.65}
-  .c .go{margin-top:18px;font-size:13px;color:#c6a76e;font-weight:600}
-  .foot{margin-top:50px;font-size:12px;color:#5a6472;text-align:center;line-height:1.8}
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  :root{
+    --bg:#eef2f8;--card:#fff;--brand:#2f6bff;--brand-soft:#eaf1ff;
+    --text:#1a2029;--dim:#8a93a3;--soft:#5a6472;--line:#eef0f4;
+    --gold:#c6a76e;--green:#12b886;--red:#f0563f;--user:#dbe6ff;
+  }
+  body{background:#c9d3e2;font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    display:flex;justify-content:center;align-items:flex-start;padding:24px 12px;min-height:100vh}
+  /* 手机外框 */
+  .phone{width:390px;background:var(--bg);border-radius:44px;overflow:hidden;
+    box-shadow:0 30px 80px rgba(20,40,80,.35);border:10px solid #0d1117;position:relative}
+  .statusbar{height:44px;display:flex;align-items:center;justify-content:space-between;
+    padding:0 26px;font-size:14px;font-weight:600;color:var(--text);background:var(--bg)}
+  .statusbar .right{display:flex;gap:5px;align-items:center;font-size:12px}
+  /* 顶栏 */
+  .nav{display:flex;align-items:center;justify-content:space-between;padding:8px 18px 12px;background:var(--bg)}
+  .nav .tabs{display:flex;gap:22px;font-size:17px;color:var(--dim);font-weight:500}
+  .nav .tabs .on{color:var(--text);font-weight:700;background:#fff;padding:5px 16px;border-radius:20px;
+    box-shadow:0 2px 8px rgba(0,0,0,.06)}
+  .nav .badge{font-size:9px;background:#fff;color:var(--brand);border:1px solid var(--brand);
+    border-radius:5px;padding:1px 4px;position:relative}
+  .nav .badge::after{content:"";position:absolute;top:-3px;right:-3px;width:6px;height:6px;background:var(--red);border-radius:50%}
+  .nav .ic{color:var(--dim);font-size:18px}
+  /* 聊天区 */
+  .chat{height:660px;overflow-y:auto;padding:10px 16px 20px;scroll-behavior:smooth}
+  .chat::-webkit-scrollbar{width:0}
+  .daytag{text-align:center;margin:6px 0 16px}
+  .daytag span{background:#dfe4ec;color:#97a0af;font-size:12px;padding:3px 12px;border-radius:12px}
+  /* 消息行 */
+  .row{display:flex;gap:8px;margin-bottom:14px;align-items:flex-start;opacity:0;transform:translateY(8px);
+    animation:fadein .4s ease forwards}
+  @keyframes fadein{to{opacity:1;transform:none}}
+  .av{width:38px;height:38px;border-radius:12px;flex-shrink:0;object-fit:cover;
+    background:linear-gradient(135deg,#7aa0ff,#4f7bff);display:flex;align-items:center;justify-content:center;
+    font-size:20px}
+  .bubble{max-width:80%;background:var(--card);border-radius:4px 16px 16px 16px;padding:13px 15px;
+    font-size:15px;line-height:1.6;color:var(--text);box-shadow:0 2px 10px rgba(30,50,90,.05)}
+  .bubble b{color:var(--brand)}
+  .bubble .hl{color:var(--red);font-weight:700}
+  .bubble .gl{color:var(--green);font-weight:700}
+  .row.me{flex-direction:row-reverse}
+  .row.me .bubble{background:var(--user);border-radius:16px 4px 16px 16px;color:#1a2c4d}
+  .row.me .av{background:linear-gradient(135deg,#ffd27a,#f0a93f);font-size:18px}
+  /* 卡片（AI 回答里嵌的结构化块） */
+  .rcard{max-width:86%;background:var(--card);border-radius:16px;padding:16px;margin:-4px 0 14px 46px;
+    box-shadow:0 3px 14px rgba(30,50,90,.06);opacity:0;transform:translateY(8px);animation:fadein .4s ease forwards}
+  .rcard .ct{font-size:15px;font-weight:700;color:var(--text);margin-bottom:12px;
+    padding-left:9px;border-left:3px solid var(--brand)}
+  /* KPI 行 */
+  .kpis{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .kbox{background:#f6f8fc;border-radius:10px;padding:10px 12px}
+  .kbox .kv{font-size:19px;font-weight:800;color:var(--text)}
+  .kbox .kv.g{color:var(--green)}.kbox .kv.r{color:var(--red)}
+  .kbox .kl{font-size:11px;color:var(--dim);margin-top:2px}
+  .ftip{background:#fff8ec;border:1px solid #f5e4c3;border-radius:10px;padding:11px 13px;margin-top:11px;
+    font-size:13px;line-height:1.6;color:#7a5a1f}
+  .ftip b{color:#b5831f}
+  /* 趋势柱 */
+  .trend{display:flex;align-items:flex-end;gap:2px;height:90px;margin:6px 0 4px}
+  .trend i{flex:1;background:linear-gradient(180deg,#a9c3ff,#dfe9ff);border-radius:2px 2px 0 0}
+  .trend i.hot{background:linear-gradient(180deg,#2f6bff,#7aa0ff)}
+  .tlabel{display:flex;justify-content:space-between;font-size:11px;color:var(--dim);margin-top:4px}
+  /* 明细列表 */
+  .litem{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+  .litem:last-child{border:none}
+  .litem .ln{font-size:14px;color:var(--text)}
+  .litem .ls{font-size:11px;color:var(--dim);margin-top:2px}
+  .litem .lv{font-size:15px;font-weight:700}
+  .litem .lv.r{color:var(--red)}
+  /* 对标条 */
+  .vs{margin:10px 0}
+  .vs .vh{display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px}
+  .vs .vh b{color:var(--text)}
+  .vs .track{height:7px;background:#eef0f4;border-radius:4px;position:relative;overflow:visible}
+  .vs .track .fill{height:100%;border-radius:4px;background:linear-gradient(90deg,#2f6bff,#7aa0ff)}
+  .vs .track .fill.bad{background:linear-gradient(90deg,#f0563f,#ff8a72)}
+  .vs .track .peer{position:absolute;top:-3px;width:2px;height:13px;background:#333;border-radius:2px}
+  .vs .vn{font-size:11px;color:var(--dim);margin-top:3px}
+  /* 标签 */
+  .tags{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 2px}
+  .tags span{font-size:12px;background:var(--brand-soft);color:var(--brand);padding:3px 10px;border-radius:14px}
+  .ind{background:#f6f8fc;border-radius:10px;padding:11px 13px;margin-top:8px}
+  .ind .ih{font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px}
+  .ind .ib{font-size:12.5px;color:var(--soft);line-height:1.55}
+  .ind .ib b{color:var(--brand)}
+  .ind .ia{font-size:12px;color:var(--green);font-weight:600;margin-top:5px}
+  /* 推荐问题气泡 */
+  .sugs{display:flex;flex-direction:column;gap:9px;margin:4px 0 14px 46px}
+  .sug{background:#fff;border:1px solid #e3e9f2;border-radius:22px;padding:11px 16px;font-size:14px;
+    color:var(--text);cursor:pointer;transition:.15s;display:flex;align-items:center;gap:8px;width:fit-content;max-width:88%}
+  .sug:hover{border-color:var(--brand);color:var(--brand);transform:translateX(2px)}
+  .sug .si{font-size:16px}
+  /* 分析中 */
+  .thinking{display:flex;flex-direction:column;gap:7px;font-size:14px;color:var(--soft)}
+  .thinking .tl{display:flex;align-items:center;gap:8px}
+  .thinking .tl .dot{width:14px;height:14px;border:2px solid var(--brand);border-radius:50%;
+    border-top-color:transparent;animation:spin .8s linear infinite}
+  .thinking .tl.done .dot{border:none;color:var(--brand)}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  /* 输入栏 */
+  .inputbar{display:flex;align-items:center;gap:10px;padding:12px 16px 16px;background:var(--bg);border-top:1px solid #e3e8f0}
+  .inputbar .plus{width:34px;height:34px;font-size:24px;color:var(--dim);display:flex;align-items:center;justify-content:center}
+  .inputbar .box{flex:1;background:#fff;border-radius:22px;padding:11px 18px;font-size:14px;color:var(--dim);
+    box-shadow:0 2px 8px rgba(0,0,0,.04)}
+  .inputbar .mic{width:38px;height:38px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;
+    font-size:18px;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+  .aigen{text-align:center;font-size:11px;color:#b3bcc9;padding:4px 0 8px;background:var(--bg)}
+  .reset{position:absolute;top:52px;right:16px;z-index:9;background:var(--brand);color:#fff;border:none;
+    padding:6px 12px;border-radius:14px;font-size:12px;cursor:pointer;box-shadow:0 3px 10px rgba(47,107,255,.3)}
 </style>
 </head>
 <body>
-  <div class="logo">BUSINESS COMPASS</div>
-  <h1>商策罗盘</h1>
-  <div class="sub">基于京东支付真实交易与结算数据的商家经营决策 Agent<br>——以马克华菲童装服饰旗舰店为例，看看它能给 POP 商户做什么</div>
-  <div class="cards">
-    <a class="c" href="./chat.html">
-      <div class="ico">💬</div>
-      <h2>对话版 Demo</h2>
-      <p>像和经营顾问聊天一样，一句句追问：赚了多少、客户是谁、同行里排第几、下一步怎么做。手机对话界面。</p>
-      <div class="go">点击体验 →</div>
-    </a>
-    <a class="c" href="./report.html">
-      <div class="ico">📊</div>
-      <h2>报告版 Demo</h2>
-      <p>一次性生成的完整经营诊断报告：资金流真账、增长趋势、客群画像、同行对标、问题商品、行动清单。</p>
-      <div class="go">点击体验 →</div>
-    </a>
+<div class="phone">
+  <button class="reset" onclick="location.reload()">↺ 重播</button>
+  <div class="statusbar"><span>11:04</span><span class="right">📶 5G 🔋76</span></div>
+  <div class="nav">
+    <div style="display:flex;align-items:center;gap:8px"><span class="badge">内测中</span><span class="ic">☰</span></div>
+    <div class="tabs"><span class="on">罗盘</span></div>
+    <div style="display:flex;gap:12px"><span class="ic">🔊</span><span class="ic">✕</span></div>
   </div>
-  <div class="foot">队伍 · 心里有数　|　京东支付 · 基础产品部<br>本页为黑马大赛演示用途</div>
+
+  <div class="chat" id="chat">
+    <div class="daytag"><span>今天 11:04</span></div>
+  </div>
+
+  <div class="inputbar">
+    <span class="plus">＋</span>
+    <div class="box">问问你的生意…</div>
+    <span class="mic">🎙️</span>
+  </div>
+  <div class="aigen">内容由 AI 生成 · 数据来自京东支付真实交易</div>
+</div>
+
+<script>
+const chat=document.getElementById('chat');
+const AV='<div class="av">🧭</div>';
+const ME='<div class="av" style="background:linear-gradient(135deg,#ffd27a,#f0a93f)">🏪</div>';
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+function scroll(){chat.scrollTop=chat.scrollHeight;}
+function add(html){const d=document.createElement('div');d.innerHTML=html;chat.appendChild(d.firstElementChild);scroll();}
+
+function aiBubble(text){add(`<div class="row">${AV}<div class="bubble">${text}</div></div>`);}
+function meBubble(text){add(`<div class="row me">${ME}<div class="bubble">${text}</div></div>`);}
+function card(title,body){add(`<div class="rcard"><div class="ct">${title}</div>${body}</div>`);}
+
+// 分析中动画
+async function thinking(steps){
+  const id='th'+Math.random().toString(36).slice(2);
+  add(`<div class="row" id="${id}">${AV}<div class="bubble"><div class="thinking">${
+    steps.map(s=>`<div class="tl"><span class="dot"></span>${s}</div>`).join('')}</div></div></div>`);
+  const rows=[...document.querySelectorAll('#'+id+' .tl')];
+  for(let i=0;i<rows.length;i++){await wait(650);rows[i].classList.add('done');rows[i].querySelector('.dot').textContent='✓';}
+  await wait(400);
+  document.getElementById(id).remove();
+}
+
+function sugs(list){
+  const html=list.map(s=>`<div class="sug" data-q="${s.q}" data-fn="${s.fn}"><span class="si">${s.i}</span>${s.q}</div>`).join('');
+  add(`<div class="sugs" id="curSugs">${html}</div>`);
+  document.querySelectorAll('#curSugs .sug').forEach(el=>{
+    el.addEventListener('click',()=>{
+      const q=el.dataset.q,fn=el.dataset.fn;
+      document.getElementById('curSugs').remove();
+      window[fn](q);
+    });
+  });
+}
+
+// ============ 各轮回答 ============
+
+// 开场
+async function boot(){
+  await wait(300);
+  aiBubble('老板好呀 👋 我是<b>商策罗盘</b>，你的经营小助手。我连着京东支付的真实交易和结算数据，账算得清、客看得透、同行也帮你盯着——想先看点啥？');
+  await wait(500);
+  sugs([
+    {i:'💰',q:'这个月我到底赚了多少？',fn:'ansMoney'},
+    {i:'📈',q:'我的生意最近有什么变化？',fn:'ansTrend'},
+    {i:'👥',q:'买我童装的都是些什么人？',fn:'ansPersona'},
+    {i:'📊',q:'我在同行里算好还是差？',fn:'ansPeer'},
+    {i:'🔁',q:'我的复购和高价值客户情况？',fn:'ansRepeat'},
+  ]);
+}
+
+// 1 赚了多少
+async function ansMoney(q){
+  meBubble(q);
+  await wait(400);
+  await thinking(['读取结算全链路数据','拆解货款/佣金/服务费/退款','核算真实到手']);
+  aiBubble('帮你算清楚啦～这个月账面货款 GMV <b>59.0 万</b>，但别只看流水。扣掉平台佣金、运费险、商品险这些服务费 4.6 万，再减去退款冲正 3.5 万，<b>真实到手其实是 <span class="gl">50.9 万</span></b>，真实利润率 86.3%。');
+  card('💰 真账体检（本月）',`
+    <div class="kpis">
+      <div class="kbox"><div class="kv">¥59.0万</div><div class="kl">账面货款 GMV</div></div>
+      <div class="kbox"><div class="kv r">-¥4.6万</div><div class="kl">佣金+服务费</div></div>
+      <div class="kbox"><div class="kv r">-¥3.5万</div><div class="kl">退款冲正</div></div>
+      <div class="kbox"><div class="kv g">¥50.9万</div><div class="kl">真实到手</div></div>
+    </div>
+    <div class="ftip">💡 <b>退款 3.5 万</b>是你最大的可控漏洞——集中在几款高退货商品上，想看是哪几款吗？</div>`);
+  await wait(500);
+  sugs([
+    {i:'📦',q:'哪些商品退款最多？',fn:'ansSku'},
+    {i:'📈',q:'那我生意最近的走势呢？',fn:'ansTrend'},
+    {i:'👥',q:'买我东西的是什么人？',fn:'ansPersona'},
+  ]);
+}
+
+// 2 趋势
+async function ansTrend(q){
+  meBubble(q);
+  await wait(400);
+  await thinking(['拉取近30天每日订单','识别增长拐点']);
+  aiBubble('有个好消息！<b>7月27日起你的订单量明显起飞了</b> 🚀 前10天日均才 756 单，7/27之后冲到日均 <b>1,216 单</b>，涨了 <span class="gl">61%</span>，7/29 当天最高 1,534 单。暑期/开学季的需求来了。');
+  const data=[798,797,850,790,913,901,754,720,587,455,560,719,859,758,444,287,308,370,680,992,855,834,1147,1356,1454,1534,1388,1148,1122,949,778];
+  const mx=Math.max(...data);
+  const bars=data.map((v,i)=>`<i class="${i>=23?'hot':''}" style="height:${Math.round(v/mx*100)}%"></i>`).join('');
+  card('📈 近30天订单趋势',`
+    <div class="trend">${bars}</div>
+    <div class="tlabel"><span>07-04</span><span style="color:var(--brand);font-weight:700">7/27 拐点↑</span><span>08-03</span></div>
+    <div class="ftip">💡 增长窗口已打开，建议<b>立即补足 110-130 主力码库存</b>、加大爆款 IP 备货，别断货错过这波。</div>`);
+  await wait(500);
+  sugs([
+    {i:'👥',q:'那这波买家都是些什么人？',fn:'ansPersona'},
+    {i:'📊',q:'同行也在涨吗？我排第几？',fn:'ansPeer'},
+  ]);
+}
+
+// 3 画像
+async function ansPersona(q){
+  meBubble(q);
+  await wait(400);
+  await thinking(['基于实名身份识别唯一真人','解析年龄/性别/地域','脱敏聚合群体特征']);
+  aiBubble('这是零售后台给不了的角度——我能靠<b>实名身份</b>还原买家画像。你的核心客群是 <b>31-38 岁、江浙沪、女性家长</b>，而且消费力不弱，<b>58% 用信用卡</b>付款。');
+  card('👥 谁在买你的童装',`
+    <div class="kpis">
+      <div class="kbox"><div class="kv">31-38岁</div><div class="kl">主力家长年龄</div></div>
+      <div class="kbox"><div class="kv">68%</div><div class="kl">女性家长</div></div>
+      <div class="kbox"><div class="kv">江浙沪</div><div class="kl">地域 TOP</div></div>
+      <div class="kbox"><div class="kv">58%</div><div class="kl">信用卡占比</div></div>
+    </div>
+    <div class="ftip">💡 年龄是<b>由真实购买尺码反推</b>的：110-130码占54%→孩子3-6岁→家长31-38岁。这是一批消费力扎实的中产家庭。</div>`);
+  await wait(500);
+  sugs([
+    {i:'🔁',q:'那我的复购和高价值客户呢？',fn:'ansRepeat'},
+    {i:'📊',q:'这客群比同行好吗？',fn:'ansPeer'},
+  ]);
+}
+
+// 4 同行对标（总览，引出逐维度深挖）
+async function ansPeer(q){
+  meBubble(q);
+  await wait(400);
+  await thinking(['按类目/价格带/区域匹配同行','脱敏计算行业基准','生成对标总览']);
+  aiBubble('我拿你和<b>同主营类目（童装/童鞋）</b>的商户做了全面对标。先给你一句话结论：<b class="gl">整体优于同行</b>——6 个维度里你 4 项领先、1 项持平、1 项落后。想从哪个维度看细节？咱们一个个拆。');
+  card('📊 同行对标 · 总览',`
+    <div style="background:#f6f8fc;border-radius:10px;padding:12px 13px;margin-bottom:10px">
+      <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:8px">👥 客群画像对比</div>
+      <div style="display:flex;gap:10px">
+        <div style="flex:1"><div style="font-size:11px;color:var(--dim);margin-bottom:3px">你的客群</div>
+          <div style="font-size:12.5px;line-height:1.6;color:var(--brand);font-weight:600">江浙沪 · 31-38岁<br>女性家长 · 高购买力</div></div>
+        <div style="width:1px;background:var(--line)"></div>
+        <div style="flex:1"><div style="font-size:11px;color:var(--dim);margin-bottom:3px">行业平均</div>
+          <div style="font-size:12.5px;line-height:1.6;color:var(--soft)">全国分散 · 35-40岁<br>家长 · 中等购买力</div></div>
+      </div>
+    </div>
+    <div class="litem"><div><div class="ln">💰 价格带</div><div class="ls">客单偏低</div></div><div class="lv" style="color:var(--gold)">偏低 －</div></div>
+    <div class="litem"><div><div class="ln">↩️ 退款率</div><div class="ls">略高于同行</div></div><div class="lv r">落后 ▼</div></div>
+    <div class="litem"><div><div class="ln">🔥 爆款/趋势</div><div class="ls">部分品类缺位</div></div><div class="lv" style="color:var(--gold)">有缺口 －</div></div>
+    <div class="litem"><div><div class="ln">🗺️ 区域覆盖</div><div class="ls">中西部不足</div></div><div class="lv" style="color:var(--gold)">有机会 －</div></div>
+    <div class="litem"><div><div class="ln">📈 利润率</div><div class="ls">优于同行</div></div><div class="lv gl">领先 ▲</div></div>`);
+  await wait(500);
+  aiBubble('先看哪个？我建议从<b>客群画像对比</b>开始，因为它决定了你后面所有的定价和选品策略。');
+  sugs([
+    {i:'👥',q:'先看客群画像对比',fn:'peerPersona'},
+    {i:'↩️',q:'我的退款率为啥落后？',fn:'peerRefund'},
+    {i:'💰',q:'我的价格带偏低吗？',fn:'peerPrice'},
+  ]);
+}
+
+// 同行对标 · 客群画像对比
+async function peerPersona(q){
+  meBubble(q);
+  await wait(400);
+  await thinking(['对齐同行客群结构','逐指标计算差距']);
+  aiBubble('你的客群<b>整体比同行更优质</b> 👍 消费力、城市层级都领先——这是你能走中高端、卖溢价的底气。');
+  card('👥 客群画像 · 你 vs 同行',`
+    <div class="vs"><div class="vh"><b>信用卡占比（消费力）</b><span class="gl">58% ▲ 高13pt</span></div>
+      <div class="track"><div class="fill" style="width:58%"></div><div class="peer" style="left:45%"></div></div>
+      <div class="vn">同行均值 45%</div></div>
+    <div class="vs"><div class="vh"><b>一二线城市占比</b><span class="gl">55% ▲ 高15pt</span></div>
+      <div class="track"><div class="fill" style="width:55%"></div><div class="peer" style="left:40%"></div></div>
+      <div class="vn">同行均值 40%</div></div>
+    <div class="vs"><div class="vh"><b>家长平均年龄</b><span>34岁（同行36岁）</span></div>
+      <div class="track"><div class="fill" style="width:70%"></div><div class="peer" style="left:78%"></div></div>
+      <div class="vn">你的客群更年轻</div></div>
+    <div class="ftip">💡 客群更年轻高端、消费力更强，<b>你完全撑得起比同行更高的定价</b>。可你的客单价却偏低——这就矛盾了，接着往下看价格带。</div>`);
+  await wait(500);
+  aiBubble('既然客群这么优质，为什么客单价还偏低？咱看看<b>价格带对比</b>。');
+  sugs([
+    {i:'💰',q:'那看看价格带对比',fn:'peerPrice'},
+    {i:'↩️',q:'先解决退款率的问题',fn:'peerRefund'},
+  ]);
+}
+
+// 同行对标 · 价格带对比
+async function peerPrice(q){
+  meBubble(q);
+  await wait(400);
+  await thinking(['计算同类目价格带分布','定位你的价格位置']);
+  aiBubble('找到矛盾点了！你客单价 <b>¥22.6</b>，卡在同类目<b>偏低区间</b>（同行中位 ¥35）。明明客群消费力强，却卖着低价——<b>钱没赚够</b>。原因是你爆款集中在基础款 T 恤。');
+  card('💰 价格带分布 · 你 vs 同行',`
+    <div class="vs"><div class="vh"><b>¥0-25 低价带</b><span class="hl">你在这里</span></div>
+      <div class="track"><div class="fill bad" style="width:70%"></div></div>
+      <div class="vn">你的订单 70% 在此区间</div></div>
+    <div class="vs"><div class="vh"><b>¥25-50 中价带</b><span>同行主力</span></div>
+      <div class="track"><div class="fill" style="width:55%"></div><div class="peer" style="left:50%"></div></div>
+      <div class="vn">同行中位 ¥35</div></div>
+    <div class="vs"><div class="vh"><b>¥50+ 高价带</b><span>你几乎空白</span></div>
+      <div class="track"><div class="fill" style="width:12%"></div></div>
+      <div class="vn">仅占 5%</div></div>
+    <div class="ftip">💡 <b>引入设计感套装、亲子款，把客单价上探到 ¥30 区间</b>。你的高端客群接得住，白条分期还能助推——这是最快的提利润路径。</div>`);
+  await wait(500);
+  aiBubble('价格能往上走，但要先堵住漏钱的地方——你的<b>退款率</b>还偏高，咱看看问题出在哪。');
+  sugs([
+    {i:'↩️',q:'看看退款率对比',fn:'peerRefund'},
+    {i:'🔥',q:'同行都在卖什么爆款？',fn:'peerHot'},
+  ]);
+}
+
+// 同行对标 · 退款率对比
+async function peerRefund(q){
+  meBubble(q);
+  await wait(400);
+  await thinking(['对比同行退款率','下钻高退款商品']);
+  aiBubble('这是你唯一落后同行的地方 ⚠️ 退款率 <b class="hl">5.9%</b>，比同行均值高 1.4 个点。别小看这 1.4 个点——一个月就是几千块的利润漏出去了。而且它集中在几款商品上。');
+  card('↩️ 退款率 · 你 vs 同行',`
+    <div class="vs"><div class="vh"><b>整体退款率</b><span class="hl">5.9% ▼ 高1.4pt</span></div>
+      <div class="track"><div class="fill bad" style="width:59%"></div><div class="peer" style="left:45%"></div></div>
+      <div class="vn">同行均值 4.5%</div></div>
+    <div class="litem"><div><div class="ln">浅花灰烟花时刻 110</div><div class="ls">高退款款</div></div><div class="lv r">14.2%</div></div>
+    <div class="litem"><div><div class="ln">浅花灰烟花时刻 140</div><div class="ls">高退款款</div></div><div class="lv r">13.6%</div></div>
+    <div class="litem"><div><div class="ln">插肩袖上衣·白/浅花灰 100</div><div class="ls">高退款款</div></div><div class="lv r">13.1%</div></div>
+    <div class="ftip">💡 "浅花灰"系列多个尺码都高退款，<b>大概率是这个印花的色差或版型问题</b>，优先排查这一个系列，就能把整体退款率压下来。</div>`);
+  await wait(500);
+  aiBubble('堵住漏洞后，再看看<b>怎么找增量</b>——同行在卖的爆款、升温的趋势词，你有没有踏空。');
+  sugs([
+    {i:'🔥',q:'同行爆款和趋势词有哪些？',fn:'peerHot'},
+    {i:'🗺️',q:'还有哪些区域机会？',fn:'peerRegion'},
+  ]);
+}
+
+// 同行对标 · 爆款与趋势
+async function peerHot(q){
+  meBubble(q);
+  await wait(400);
+  await thinking(['拉取同类目热销榜','识别升温关键词']);
+  aiBubble('你的「大白吉他小熊」已经踩中同类目热销 👍 但有几个同行卖爆、你却<b>还没布局的品类</b>，以及正在升温的关键词，抓住能吃一波流量。');
+  card('🔥 爆款对标 & 趋势关键词',`
+    <div class="ind"><div class="ih">🔥 你缺位的同行爆款</div>
+      <div class="ib">同行热卖的<b>「冰丝防晒衣」「速干套装」</b>你还没上，这是夏季刚需。</div>
+      <div class="ia">→ 补齐防晒/速干品类，承接夏季需求</div></div>
+    <div class="ind"><div class="ih">📈 升温中的搜索关键词</div>
+      <div class="tags"><span>冰丝防晒</span><span>插肩袖</span><span>亲子装</span><span>UPF50+</span><span>无骨缝制</span></div>
+      <div class="ia">→ 把这些词加进标题和主图，蹭自然流量</div></div>`);
+  await wait(500);
+  aiBubble('选品方向有了，最后看看<b>卖到哪去</b>——有片区域你还没吃透。');
+  sugs([
+    {i:'🗺️',q:'哪些区域还有机会？',fn:'peerRegion'},
+    {i:'🧭',q:'同行这块都看完了，汇总下建议',fn:'ansAction'},
+  ]);
+}
+
+// 同行对标 · 区域机会
+async function peerRegion(q){
+  meBubble(q);
+  await wait(400);
+  await thinking(['对比同类目区域增速','定位你的覆盖盲区']);
+  aiBubble('最后一块拼图——<b>区域机会</b>。你的订单 80% 挤在江浙沪，但同类目增长最快的地方你反而没覆盖，这里有大片增量。');
+  card('🗺️ 区域机会 · 你 vs 大盘',`
+    <div class="vs"><div class="vh"><b>江浙沪（你的大本营）</b><span>占你 80%</span></div>
+      <div class="track"><div class="fill" style="width:80%"></div></div>
+      <div class="vn">已饱和，增长有限</div></div>
+    <div class="vs"><div class="vh"><b>川渝（同类目增速第一）</b><span class="hl">你仅占 4%</span></div>
+      <div class="track"><div class="fill bad" style="width:8%"></div><div class="peer" style="left:30%"></div></div>
+      <div class="vn">大盘增速领先，你覆盖不足</div></div>
+    <div class="vs"><div class="vh"><b>华中（增速第二）</b><span>你占 6%</span></div>
+      <div class="track"><div class="fill bad" style="width:12%"></div><div class="peer" style="left:28%"></div></div>
+      <div class="vn">同样有增量空间</div></div>
+    <div class="ftip">💡 <b>对川渝、华中做定向投放和物流优化</b>，抢这波区域增量。你的品牌在这些地方还是蓝海。</div>`);
+  await wait(500);
+  aiBubble('好啦，同行对标 6 个维度全看完了 🎉 我把所有结论汇总成一份<b>行动清单</b>给你？');
+  sugs([
+    {i:'🧭',q:'好，汇总成行动清单',fn:'ansAction'},
+    {i:'🔁',q:'先看下我的复购情况',fn:'ansRepeat'},
+  ]);
+}
+
+// SKU
+async function ansSku(q){
+  meBubble(q);
+  await wait(400);
+  await thinking(['按SKU聚合销售与退款','计算单款退款率']);
+  aiBubble('揪出来了！这几款<b>退款率超 12%</b>，是店均（5.9%）的两倍多，疑似印花或版型有问题，建议优先排查。');
+  card('📦 高退款商品 TOP',`
+    <div class="litem"><div><div class="ln">女童T恤·浅花灰烟花时刻 110</div><div class="ls">销售 ¥1,616</div></div><div class="lv r">14.2%</div></div>
+    <div class="litem"><div><div class="ln">女童T恤·浅花灰烟花时刻 140</div><div class="ls">销售 ¥1,442</div></div><div class="lv r">13.6%</div></div>
+    <div class="litem"><div><div class="ln">插肩袖上衣·白/浅花灰 100</div><div class="ls">销售 ¥1,493</div></div><div class="lv r">13.1%</div></div>
+    <div class="litem"><div><div class="ln">女童T恤·樱花粉吉他小熊 110</div><div class="ls">销售 ¥1,946</div></div><div class="lv r">12.9%</div></div>
+    <div class="ftip">💡 "浅花灰"系列多个尺码都高退款，<b>大概率是这个印花的版型或色差问题</b>，建议先查这个系列。</div>`);
+  await wait(500);
+  sugs([
+    {i:'🧭',q:'那我整体该怎么调整？',fn:'ansAction'},
+    {i:'📊',q:'我在同行里排第几？',fn:'ansPeer'},
+  ]);
+}
+
+// 复购与高价值客户
+async function ansRepeat(q){
+  meBubble(q);
+  await wait(400);
+  await thinking(['统计客户复购次数与金额','圈定高价值客户']);
+  aiBubble('帮你算准了：本月真实复购率 <b class="gl">23%</b>，还有一批<b>高价值客户</b>值得你重点维护——他们下单频次和贡献都远超普通客户。');
+  card('🔁 复购与高价值客户',`
+    <div class="kpis">
+      <div class="kbox"><div class="kv g">23%</div><div class="kl">本月复购率</div></div>
+      <div class="kbox"><div class="kv">4.2次</div><div class="kl">高价值客户月均下单</div></div>
+      <div class="kbox"><div class="kv">386人</div><div class="kl">高价值客户数</div></div>
+      <div class="kbox"><div class="kv">31%</div><div class="kl">高价值客贡献的GMV</div></div>
+    </div>
+    <div class="ftip">💡 <b>386 个高价值客户贡献了 31% 的销售额</b>——建议给他们专属新品优先购、生日券，把复购率再往上拉。</div>`);
+  await wait(500);
+  sugs([
+    {i:'💳',q:'他们都用什么方式付款？',fn:'ansPay'},
+    {i:'🛒',q:'这些人还在京东买什么？',fn:'ansCross'},
+    {i:'🧭',q:'那我下一步该怎么做？',fn:'ansAction'},
+  ]);
+}
+
+// 支付方式洞察
+async function ansPay(q){
+  meBubble(q);
+  await wait(400);
+  await thinking(['解析支付方式与银行卡类型','推断消费力与分期意愿']);
+  aiBubble('付款方式藏着消费力信号，这也是只有支付看得到的 👀 你的客户 <b>58% 用信用卡</b>、<b>23% 用白条</b>——说明他们既有消费力、又接受分期，这是你上探客单价的好机会。');
+  card('💳 支付方式洞察',`
+    <div class="vs"><div class="vh"><b>信用卡</b><span class="gl">58%</span></div>
+      <div class="track"><div class="fill" style="width:58%"></div></div>
+      <div class="vn">消费力强、对价格不敏感</div></div>
+    <div class="vs"><div class="vh"><b>白条（分期）</b><span>23%</span></div>
+      <div class="track"><div class="fill" style="width:23%"></div></div>
+      <div class="vn">接受分期，可承接高客单</div></div>
+    <div class="vs"><div class="vh"><b>储蓄卡/余额</b><span>19%</span></div>
+      <div class="track"><div class="fill" style="width:19%"></div></div>
+      <div class="vn">价格敏感型</div></div>
+    <div class="ftip">💡 <b>八成客户有消费力或愿分期</b>——大胆推 199 元亲子套装 + 白条 3 期免息，客单价能往上走一截。</div>`);
+  await wait(500);
+  sugs([
+    {i:'🛒',q:'这些人还在京东买什么？',fn:'ansCross'},
+    {i:'🧭',q:'综合看我该怎么做？',fn:'ansAction'},
+  ]);
+}
+
+// 跨品类消费
+async function ansCross(q){
+  meBubble(q);
+  await wait(400);
+  await thinking(['关联同一真人全京东消费','聚合高重合品类']);
+  aiBubble('这是跨商户的全局视角——我能看到买你童装的人<b>在整个京东还爱买什么</b>。重合度最高的是母婴、童书、儿童零食，全是"为孩子花钱"的品类，联营空间很大。');
+  card('🛒 客群跨品类消费（全京东）',`
+    <div class="litem"><div><div class="ln">🍼 母婴用品</div><div class="ls">客群重合度</div></div><div class="lv">62%</div></div>
+    <div class="litem"><div><div class="ln">📚 童书/绘本</div><div class="ls">客群重合度</div></div><div class="lv">48%</div></div>
+    <div class="litem"><div><div class="ln">🍪 儿童零食</div><div class="ls">客群重合度</div></div><div class="lv">41%</div></div>
+    <div class="litem"><div><div class="ln">🧸 益智玩具</div><div class="ls">客群重合度</div></div><div class="lv">37%</div></div>
+    <div class="ftip">💡 你的客群和母婴/童书高度重合——<b>可以和这些类目商户做联合营销、互相导流</b>，一次触达一群"为孩子花钱"的家长。</div>`);
+  await wait(500);
+  sugs([
+    {i:'🧭',q:'把这些都汇总成行动方案吧',fn:'ansAction'},
+  ]);
+}
+
+// 行动清单
+async function ansAction(q){
+  meBubble(q);
+  await wait(400);
+  await thinking(['汇总各项诊断结论','生成经营行动方案']);
+  aiBubble('好嘞，我把前面所有分析拧成一份<b>行动清单</b>，每条都有数据依据，你照着做就行 👇');
+  card('🧭 商策罗盘给你的行动清单',`
+    <div class="litem"><div><div class="ln">① 抓增长窗口，补主力码库存</div><div class="ls">订单已涨61%，别断货</div></div></div>
+    <div class="litem"><div><div class="ln">② 走中高端亲子路线</div><div class="ls">客群比同行更高端，撑得起溢价</div></div></div>
+    <div class="litem"><div><div class="ln">③ 引设计感套装 + 推白条分期</div><div class="ls">上探客单价至¥30区间</div></div></div>
+    <div class="litem"><div><div class="ln">④ 排查"浅花灰"高退款款</div><div class="ls">退款率超12%，堵利润漏洞</div></div></div>
+    <div class="litem"><div><div class="ln">⑤ 维护高价值客户</div><div class="ls">386人贡献31%GMV，给专属权益</div></div></div>
+    <div class="litem"><div><div class="ln">⑥ 补防晒/速干品类·投放川渝</div><div class="ls">承接趋势与区域增量</div></div></div>`);
+  await wait(400);
+  aiBubble('清单给你啦～执行两周后再来找我，我帮你<b>复盘</b>见没见效，咱们再迭代 💪 还想再看看别的吗？');
+  await wait(500);
+  sugs([
+    {i:'💰',q:'再帮我算算这个月赚了多少',fn:'ansMoney'},
+    {i:'📦',q:'哪些商品退款最多？',fn:'ansSku'},
+    {i:'🛒',q:'我的客户还在京东买什么？',fn:'ansCross'},
+    {i:'📊',q:'和同行再对比一下',fn:'ansPeer'},
+  ]);
+}
+
+boot();
+</script>
 </body>
 </html>
